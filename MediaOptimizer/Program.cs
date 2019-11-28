@@ -1,4 +1,4 @@
-﻿using ImageMagick;
+using ImageMagick;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -127,7 +127,7 @@ namespace MediaOptimizer
 				try
 				{
 					var imgInfo = new FileInfo(file);
-					var sizeBefore = imgInfo.Length / 1024;
+					var sizeBefore = imgInfo.Length / 1024d;
 
 					using (var img = new MagickImage(imgInfo))
 					{
@@ -205,16 +205,16 @@ namespace MediaOptimizer
 						OptimalCompression = true,
 					};
 					optimizer.Compress(imgInfo);
-					//optimizer.LosslessCompress(imgInfo);
+					optimizer.LosslessCompress(imgInfo);
 
 					imgInfo.Refresh();
 
-					var sizeAfter = imgInfo.Length / 1024;
+					var sizeAfter = imgInfo.Length / 1024d;
 					double reductionPercent = ((sizeBefore - sizeAfter) / (double)sizeBefore) * 100;
 					WriteLineToConsole($"File processed : {file} " +
 						$"{Environment.NewLine}" +
-						$"Before : {sizeBefore}KB, " +
-						$"After : {sizeAfter}KB, " +
+						$"Before : {sizeBefore.ToString("0.##")}KB, " +
+						$"After : {sizeAfter.ToString("0.##")}KB, " +
 						$"{reductionPercent.ToString("0.##")}% reduction.",
 						ConsoleColor.Cyan
 					);
@@ -242,3 +242,5 @@ namespace MediaOptimizer
 		}
 	}
 }
+
+//dotnet publish -r win10-x64 -p:PublishSingleFile=true
