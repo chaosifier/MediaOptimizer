@@ -219,7 +219,7 @@ namespace MediaOptimizer
 						$"Before : {sizeBefore.ToString("0.##")}KB, " +
 						$"After : {sizeAfter.ToString("0.##")}KB, " +
 						$"{reductionPercent.ToString("0.##")}% reduction.",
-						ConsoleColor.Cyan
+						reductionPercent < 0 ? ConsoleColor.Red : ConsoleColor.Cyan
 					);
 				}
 				catch (Exception ex)
