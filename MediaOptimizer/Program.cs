@@ -13,9 +13,9 @@ namespace MediaOptimizer
 	{
 		private static HashSet<string> _processedFiles = new HashSet<string>();
 		private static string[] _extentionsToProcess = new[] { ".png", ".svg", ".gif", ".jpg", ".jpeg" };
-		private static int _maxWidth = 1024;
-		private static int _maxHeight = 768;
-		private static int _quality = 50;
+		private static int _maxWidth = 3840;
+		private static int _maxHeight = 2160;
+		private static int _quality = 100;
 		private static int _threadCount = 1;
 		private const string SIGNATURE = "ByMediaOptimizer";
 
@@ -30,7 +30,7 @@ namespace MediaOptimizer
 
 				while (!dirPathValid)
 				{
-					WriteToConsole($"Directory {dirPath} doesn't exist.");
+					WriteLineToConsole($"Directory {dirPath} doesn't exist.");
 					WriteToConsole("Enter directory path : ");
 					dirPath = Console.ReadLine();
 					dirPathValid = Directory.Exists(dirPath);
@@ -56,23 +56,25 @@ namespace MediaOptimizer
 				}
 				WriteLineToConsole($"Extensions set to : {string.Join(", ", _extentionsToProcess)}");
 
-				WriteToConsole($"Enter max width (default {_maxWidth}) : ");
+				WriteToConsole($"Enter max width (0 to ignore) (default {_maxWidth}) : ");
 				readValue = Console.ReadLine().Trim();
 				if (!string.IsNullOrWhiteSpace(readValue))
 				{
 					int.TryParse(readValue, out _maxWidth);
+					_maxWidth = _maxWidth < 0 ? 0 : _maxWidth;
 				}
-				WriteLineToConsole($"Max width set to : {_maxWidth}");
+				WriteLineToConsole($"Max width set to (0 to ignore) : {_maxWidth}");
 
 				WriteToConsole($"Enter max height (default {_maxHeight}) : ");
 				readValue = Console.ReadLine().Trim();
 				if (!string.IsNullOrWhiteSpace(readValue))
 				{
 					int.TryParse(readValue, out _maxHeight);
+					_maxHeight = _maxHeight < 0 ? 0 : _maxHeight;
 				}
 				WriteLineToConsole($"Max height set to : {_maxHeight}");
 
-				WriteToConsole($"Enter quality (default {_quality}) : ");
+				WriteToConsole($"Enter quality between 1-100 (default {_quality}) : ");
 				readValue = Console.ReadLine().Trim();
 				if (!string.IsNullOrWhiteSpace(readValue))
 				{
@@ -150,8 +152,8 @@ namespace MediaOptimizer
 
 						img.Quality = _quality;
 
-						int targetHeight = img.Height > _maxHeight ? _maxHeight : img.Height;
-						int targetWidth = img.Width > _maxWidth ? _maxWidth : img.Width;
+						int targetHeight = img.Height <= _maxHeight || _maxHeight <= 0 ? img.Height : _maxHeight;
+						int targetWidth = img.Width <= _maxWidth || _maxHeight <= 0 ? img.Width : _maxWidth;
 
 						// process gif
 						if (file.ToLower().EndsWith(".gif"))
@@ -188,7 +190,8 @@ namespace MediaOptimizer
 						}
 						else
 						{
-							img.AdaptiveResize(targetWidth, targetHeight);
+							if ((targetWidth > 0 || targetHeight > 0) && (targetWidth != img.Width || targetHeight != img.Height))
+								img.AdaptiveResize(targetWidth, targetHeight);
 
 							// skip writing if size reduction fails
 							if (img.ToByteArray().Length < imgInfo.Length)
